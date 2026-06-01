@@ -51,7 +51,8 @@ body {
   pointer-events: none;
   transform: translateX(30px);
   transition: opacity 0.25s ease, transform 0.25s ease;
-  padding-bottom: 16px;
+  /* Extra bottom padding so content clears the fixed nav bar */
+  padding-bottom: calc(var(--nav-h) + 24px);
 }
 .screen.active {
   opacity: 1;
@@ -667,7 +668,7 @@ body {
   color: var(--success);
   margin-bottom: 24px;
 }
-.quiz-end-actions { display: flex; flex-direction: column; gap: 10px; }
+.quiz-end-actions { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; }
 
 /* ===== PROGRESS SCREEN ===== */
 .progress-stats {
