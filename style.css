@@ -323,22 +323,40 @@ body {
 .fc-back { transform: rotateY(180deg); }
 
 .fc-speak-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 1.3rem;
+  background: none;
+  border: none;
   cursor: pointer;
-  padding: 6px;
-  min-width: 44px;
-  min-height: 44px;
+  color: #f07d1a;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 10px auto 0;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.fc-speak-btn svg { width: 36px; height: 36px; }
+.fc-speak-btn:hover { background: rgba(240,125,26,0.12); transform: scale(1.1); }
+.fc-speak-btn.speaking { animation: pulse-speak 0.6s infinite; }
+
+.fc-speak-btn-back {
+  cursor: pointer;
+  color: #f07d1a;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: var(--transition);
 }
-.fc-speak-btn:hover { background: rgba(255,255,255,0.1); }
-.fc-speak-btn.speaking { animation: pulse-speak 0.6s infinite; }
+.fc-speak-btn-back svg { width: 24px; height: 24px; }
+.fc-speak-btn-back:hover { background: rgba(240,125,26,0.12); }
 
 @keyframes pulse-speak {
   0%, 100% { transform: scale(1); }
@@ -530,16 +548,21 @@ body {
   font-style: italic;
 }
 .quiz-speak-btn {
-  background: var(--surface);
-  border: none;
-  color: var(--text);
-  font-size: 1rem;
-  padding: 8px 14px;
+  background: rgba(240,125,26,0.1);
+  border: 1.5px solid #f07d1a;
+  color: #f07d1a;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   margin-bottom: 16px;
   min-height: 44px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
 }
+.quiz-speak-btn:hover { background: rgba(240,125,26,0.2); }
 .quiz-options {
   display: flex;
   flex-direction: column;
