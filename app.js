@@ -764,8 +764,10 @@ function answerQuiz(idx) {
     fb.textContent = `✗ Answer: ${q.answer}${rom}`;
   }
 
-  // Reveal next button in-place
-  document.getElementById('quiz-next-btn').classList.add('visible');
+  // Reveal next button and scroll it into view automatically
+  const nextBtn = document.getElementById('quiz-next-btn');
+  nextBtn.classList.add('visible');
+  setTimeout(() => nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
 
   setTimeout(() => speak(koreanToSpeak), 300);
 }
