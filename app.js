@@ -679,9 +679,12 @@ function renderQuizQuestion() {
   const total = quizQuestions.length;
   const pct = (quizIndex / total) * 100;
 
+  document.getElementById('screen-quiz').classList.remove('quiz-end-active');
   document.getElementById('quiz-progress-bar').style.width = pct + '%';
   document.getElementById('quiz-score-display').textContent = `${quizScore}/${total}`;
   quizAnswered = false;
+
+  const isLast = quizIndex === quizQuestions.length - 1;
 
   let html = `<div class="quiz-question">`;
   html += `<div class="quiz-q-num">QUESTION ${quizIndex + 1} OF ${total}</div>`;
@@ -707,10 +710,24 @@ function renderQuizQuestion() {
     html += `<button class="quiz-option" id="qopt-${idx}" onclick="answerQuiz(${idx})"><span class="quiz-option-text">${opt}</span>${speakPart}</button>`;
   });
   html += `</div>`;
-  html += `<div id="quiz-feedback" class="quiz-feedback" style="display:none"></div>`;
+  html += `</div>`;
+
+  // Pre-render feedback + next button below the question — hidden until answered
+  html += `<div class="quiz-bottom">`;
+  html += `<div id="quiz-feedback" class="quiz-feedback"></div>`;
+  html += `<button class="quiz-next-btn" id="quiz-next-btn" onclick="advanceQuiz()">${isLast ? 'See Results' : 'Next Question →'}</button>`;
   html += `</div>`;
 
   document.getElementById('quiz-body').innerHTML = html;
+}
+
+function advanceQuiz() {
+  quizIndex++;
+  if (quizIndex < quizQuestions.length) {
+    renderQuizQuestion();
+  } else {
+    showQuizEnd();
+  }
 }
 
 function answerQuiz(idx) {
@@ -722,10 +739,9 @@ function answerQuiz(idx) {
   const correct = chosen === q.answer;
   if (correct) quizScore++;
 
-  // Update score display
   document.getElementById('quiz-score-display').textContent = `${quizScore}/${quizQuestions.length}`;
 
-  // Style buttons
+  // Style option buttons
   q.options.forEach((opt, i) => {
     const btn = document.getElementById('qopt-' + i);
     btn.disabled = true;
@@ -733,38 +749,25 @@ function answerQuiz(idx) {
     else if (i === idx && !correct) btn.classList.add('wrong');
   });
 
-  // Feedback
+  // Show feedback in-place (no DOM append = no scroll)
   const fb = document.getElementById('quiz-feedback');
-  fb.style.display = 'block';
-  // Always speak the Korean answer for reinforcement
   const koreanToSpeak = q.type === 'ko-en'
     ? q.questionKorean
     : (q.type === 'en-ko' || q.type === 'scenario') ? q.answer : q.questionKorean;
 
   if (correct) {
-    fb.className = 'quiz-feedback correct';
-    fb.textContent = '✓ Correct! Well done.';
-    setTimeout(() => speak(koreanToSpeak), 300);
+    fb.className = 'quiz-feedback correct visible';
+    fb.textContent = '✓ Correct!';
   } else {
-    fb.className = 'quiz-feedback wrong';
+    fb.className = 'quiz-feedback wrong visible';
     const rom = q.answerRom ? ` (${q.answerRom})` : '';
-    fb.textContent = `✗ The correct answer is: ${q.answer}${rom}`;
-    setTimeout(() => speak(koreanToSpeak), 300);
+    fb.textContent = `✗ Answer: ${q.answer}${rom}`;
   }
 
-  // Next button
-  const nextBtn = document.createElement('button');
-  nextBtn.className = 'quiz-next-btn';
-  nextBtn.textContent = quizIndex < quizQuestions.length - 1 ? 'Next Question →' : 'See Results';
-  nextBtn.onclick = () => {
-    quizIndex++;
-    if (quizIndex < quizQuestions.length) {
-      renderQuizQuestion();
-    } else {
-      showQuizEnd();
-    }
-  };
-  document.getElementById('quiz-body').appendChild(nextBtn);
+  // Reveal next button in-place
+  document.getElementById('quiz-next-btn').classList.add('visible');
+
+  setTimeout(() => speak(koreanToSpeak), 300);
 }
 
 function showQuizEnd() {
@@ -772,7 +775,8 @@ function showQuizEnd() {
   const pct = Math.round((quizScore / total) * 100);
   const pass = pct >= 70;
 
-  // Update progress bar to 100%
+  // Switch quiz screen back to scrollable for the results summary
+  document.getElementById('screen-quiz').classList.add('quiz-end-active');
   document.getElementById('quiz-progress-bar').style.width = '100%';
 
   // Save score
