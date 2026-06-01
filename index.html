@@ -11,12 +11,54 @@
 <body>
   <div id="app">
 
+    <!-- DIFFICULTY SELECTION SCREEN -->
+    <div id="screen-difficulty" class="screen active">
+      <div class="diff-wrap">
+        <div class="home-title">한국어</div>
+        <div class="home-subtitle">Korean Travel Essentials</div>
+        <div class="diff-prompt">Choose your learning level</div>
+        <div class="diff-options">
+
+          <button class="diff-card" onclick="selectDifficulty('easy')">
+            <div class="diff-emoji">🌱</div>
+            <div class="diff-name">Easy</div>
+            <div class="diff-desc">Single words only</div>
+            <div class="diff-tags">
+              <span>Nouns</span><span>Adjectives</span><span>Key expressions</span>
+            </div>
+          </button>
+
+          <button class="diff-card diff-recommended" onclick="selectDifficulty('intermediate')">
+            <div class="diff-rec-label">RECOMMENDED</div>
+            <div class="diff-emoji">🌿</div>
+            <div class="diff-name">Intermediate</div>
+            <div class="diff-desc">Words + short phrases</div>
+            <div class="diff-tags">
+              <span>Words</span><span>2–3 word phrases</span>
+            </div>
+          </button>
+
+          <button class="diff-card" onclick="selectDifficulty('advanced')">
+            <div class="diff-emoji">🌳</div>
+            <div class="diff-name">Advanced</div>
+            <div class="diff-desc">Full experience</div>
+            <div class="diff-tags">
+              <span>Words</span><span>Phrases</span><span>Full sentences</span>
+            </div>
+          </button>
+
+        </div>
+        <div class="diff-footer">You can change this anytime from the home screen</div>
+      </div>
+    </div>
+
     <!-- HOME SCREEN -->
-    <div id="screen-home" class="screen active">
+    <div id="screen-home" class="screen">
       <div class="home-header">
         <div class="home-title">한국어</div>
         <div class="home-subtitle">Korean Travel Essentials</div>
         <div class="home-tagline">Learn Korean for Jeju &amp; Seoul</div>
+        <button class="diff-mode-btn" id="diff-mode-btn" onclick="showDifficulty()"></button>
         <div class="stats-row">
           <div class="stat-item">
             <div class="stat-value" id="stat-points">0</div>
@@ -44,15 +86,7 @@
       <div class="screen-body">
         <div class="module-hero" id="module-hero"></div>
         <div class="module-desc" id="module-desc"></div>
-        <div class="lesson-list" id="lesson-list"></div>
-        <div class="module-actions">
-          <button class="btn-primary" id="btn-flashcards" onclick="startFlashcards()">
-            🃏 Start Flashcards
-          </button>
-          <button class="btn-secondary" id="btn-quiz" onclick="startQuiz()">
-            📝 Take Quiz
-          </button>
-        </div>
+        <div id="level-cards"></div>
       </div>
     </div>
 
@@ -94,14 +128,13 @@
           </div>
         </div>
       </div>
-      <!-- Alphabet mode: sound-out panel -->
       <div class="soundout-panel" id="soundout-panel" style="display:none">
         <div class="soundout-label">SOUND IT OUT</div>
         <div class="soundout-breakdown" id="soundout-breakdown"></div>
       </div>
       <div class="fc-actions">
-        <button class="btn-know" id="btn-know" onclick="markCard('know')">✓ I know this</button>
-        <button class="btn-learning" id="btn-learning" onclick="markCard('learning')">↻ Still learning</button>
+        <button class="btn-know" onclick="markCard('know')">✓ I know this</button>
+        <button class="btn-learning" onclick="markCard('learning')">↻ Still learning</button>
       </div>
       <div class="fc-nav">
         <button class="btn-nav" onclick="prevCard()">‹ Prev</button>
@@ -119,9 +152,7 @@
       <div class="quiz-progress-bar-wrap">
         <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
       </div>
-      <div class="screen-body" id="quiz-body">
-        <!-- Questions rendered here -->
-      </div>
+      <div class="screen-body" id="quiz-body"></div>
     </div>
 
     <!-- PROGRESS SCREEN -->

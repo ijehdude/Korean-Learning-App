@@ -95,6 +95,184 @@ body {
   padding: 0 16px;
 }
 
+/* ===== DIFFICULTY SCREEN ===== */
+.diff-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 32px;
+  min-height: 100%;
+}
+.diff-prompt {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 20px 0 20px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.diff-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.diff-card {
+  background: var(--surface);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  width: 100%;
+}
+.diff-card:hover  { border-color: var(--accent); background: var(--surface2); }
+.diff-card:active { transform: scale(0.98); }
+.diff-recommended {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.diff-rec-label {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: var(--accent);
+  color: #0f1c3a;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.1em;
+}
+.diff-emoji { font-size: 1.8rem; margin-bottom: 6px; }
+.diff-name  { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.diff-desc  { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+.diff-tags  { display: flex; gap: 6px; flex-wrap: wrap; }
+.diff-tags span {
+  font-size: 0.68rem;
+  background: rgba(201,164,74,0.12);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.diff-footer {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* Mode badge on home screen */
+.diff-mode-btn {
+  background: rgba(201,164,74,0.12);
+  border: 1px solid rgba(201,164,74,0.3);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: var(--transition);
+  letter-spacing: 0.03em;
+  display: inline-block;
+}
+.diff-mode-btn:hover { background: rgba(201,164,74,0.22); }
+
+/* ===== LEVEL CARDS in Module Detail ===== */
+.level-cards, #level-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.level-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: var(--transition);
+}
+.level-card.unlocked   { border-color: rgba(201,164,74,0.2); }
+.level-card.locked     { opacity: 0.55; }
+.level-card.mode-locked { opacity: 0.35; border-style: dashed; }
+.level-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.level-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.level-status { font-size: 1rem; }
+.level-name   { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+.level-subdesc { font-size: 0.76rem; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+.level-prog-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.level-prog-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.level-actions { display: flex; gap: 8px; }
+.level-btn-fc {
+  flex: 1;
+  padding: 10px;
+  background: var(--accent);
+  color: #0f1c3a;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  min-height: 42px;
+  transition: var(--transition);
+}
+.level-btn-fc:hover { filter: brightness(1.1); }
+.level-btn-quiz {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  min-height: 42px;
+  transition: var(--transition);
+}
+.level-btn-quiz:hover:not(:disabled) { background: rgba(201,164,74,0.08); }
+.level-btn-quiz:disabled { opacity: 0.35; cursor: not-allowed; }
+.level-locked-msg {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.level-upgrade-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
 /* ===== HOME SCREEN ===== */
 .home-header {
   padding: 32px 16px 16px;
