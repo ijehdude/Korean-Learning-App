@@ -6,27 +6,50 @@
 const ttsSupported = 'speechSynthesis' in window;
 let speakBtn = null;
 
+// Voices load async on some browsers — cache them once ready
+let cachedVoices = [];
+function loadVoices() {
+  cachedVoices = speechSynthesis.getVoices();
+}
+loadVoices();
+speechSynthesis.onvoiceschanged = loadVoices;
+
 function pickFemaleKoreanVoice() {
-  const voices = speechSynthesis.getVoices();
-  const femaleNames = ['yuna', 'jooyeon', 'jiyeon', 'soyeon', 'minjung', 'female', 'woman', 'girl', 'f_'];
-  const koVoices = voices.filter(v => v.lang.startsWith('ko'));
-  if (!koVoices.length) return null;
-  return koVoices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n))) || koVoices[0];
+  const voices = cachedVoices.length ? cachedVoices : speechSynthesis.getVoices();
+  return voices.find(v => v.lang === 'ko-KR' && v.name.toLowerCase().includes('female'))
+      || voices.find(v => v.lang === 'ko-KR' && (v.name.includes('Yuna') || v.name.includes('Sora') || v.name.includes('Nari')))
+      || voices.find(v => v.lang === 'ko-KR')
+      || null;
 }
 
 function speak(text, onEnd) {
   if (!ttsSupported) return;
   speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'ko-KR';
-  utt.rate = 0.85;
-  utt.pitch = 1.05;
-  if (speakBtn) speakBtn.classList.add('speaking');
-  utt.onend = () => { if (speakBtn) speakBtn.classList.remove('speaking'); if (onEnd) onEnd(); };
-  utt.onerror = () => { if (speakBtn) speakBtn.classList.remove('speaking'); };
-  const voice = pickFemaleKoreanVoice();
-  if (voice) utt.voice = voice;
-  speechSynthesis.speak(utt);
+
+  const doSpeak = () => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'ko-KR';
+    utt.rate = 0.85;
+    utt.pitch = 1.05;
+    if (speakBtn) speakBtn.classList.add('speaking');
+    utt.onend = () => { if (speakBtn) speakBtn.classList.remove('speaking'); if (onEnd) onEnd(); };
+    utt.onerror = () => { if (speakBtn) speakBtn.classList.remove('speaking'); };
+    const voice = pickFemaleKoreanVoice();
+    if (voice) utt.voice = voice;
+    speechSynthesis.speak(utt);
+  };
+
+  // If voices aren't loaded yet, wait for them then speak
+  if (!cachedVoices.length) {
+    const prev = speechSynthesis.onvoiceschanged;
+    speechSynthesis.onvoiceschanged = () => {
+      loadVoices();
+      if (prev) prev();
+      doSpeak();
+    };
+  } else {
+    doSpeak();
+  }
 }
 
 function isKorean(text) {
