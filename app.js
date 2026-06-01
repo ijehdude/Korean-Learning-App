@@ -6,27 +6,34 @@
 const ttsSupported = 'speechSynthesis' in window;
 let speakBtn = null;
 
+function pickFemaleKoreanVoice() {
+  const voices = speechSynthesis.getVoices();
+  const femaleNames = ['yuna', 'jooyeon', 'jiyeon', 'soyeon', 'minjung', 'female', 'woman', 'girl', 'f_'];
+  const koVoices = voices.filter(v => v.lang.startsWith('ko'));
+  if (!koVoices.length) return null;
+  return koVoices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n))) || koVoices[0];
+}
+
 function speak(text, onEnd) {
   if (!ttsSupported) return;
   speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = 'ko-KR';
   utt.rate = 0.85;
-  utt.pitch = 1;
+  utt.pitch = 1.05;
   if (speakBtn) speakBtn.classList.add('speaking');
-  utt.onend = () => {
-    if (speakBtn) speakBtn.classList.remove('speaking');
-    if (onEnd) onEnd();
-  };
-  utt.onerror = () => {
-    if (speakBtn) speakBtn.classList.remove('speaking');
-  };
-  // Try to use a Korean voice if available
-  const voices = speechSynthesis.getVoices();
-  const koVoice = voices.find(v => v.lang.startsWith('ko'));
-  if (koVoice) utt.voice = koVoice;
+  utt.onend = () => { if (speakBtn) speakBtn.classList.remove('speaking'); if (onEnd) onEnd(); };
+  utt.onerror = () => { if (speakBtn) speakBtn.classList.remove('speaking'); };
+  const voice = pickFemaleKoreanVoice();
+  if (voice) utt.voice = voice;
   speechSynthesis.speak(utt);
 }
+
+function isKorean(text) {
+  return /[가-힯ᄀ-ᇿ]/.test(text);
+}
+
+const SPEAKER_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="currentColor"/><path d="M16 8.5C17.333 9.667 17.333 14.333 16 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M19 6C21.667 8.333 21.667 15.667 19 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
 // ---- MODULE DATA ----
 const MODULES = [
@@ -573,14 +580,17 @@ function generateQuizQuestions(mod) {
     if (type === 0) {
       // Korean → English
       const others = pickOthers(card, 3);
-      const options = [card.english, ...others.map(c => c.english)].sort(() => Math.random() - 0.5);
+      const pairs = [[card.english, card.korean], ...others.map(c => [c.english, c.korean])].sort(() => Math.random() - 0.5);
+      const options = pairs.map(p => p[0]);
+      const optionKorean = pairs.map(p => p[1]);
       questions.push({
         type: 'ko-en',
         questionKorean: card.korean,
         questionRom: card.romanization,
         questionText: 'What does this mean?',
         answer: card.english,
-        options
+        options,
+        optionKorean
       });
     } else if (type === 1) {
       // English → Korean
@@ -667,7 +677,11 @@ function renderQuizQuestion() {
 
   html += `<div class="quiz-options">`;
   q.options.forEach((opt, idx) => {
-    html += `<button class="quiz-option" id="qopt-${idx}" onclick="answerQuiz(${idx})">${opt}</button>`;
+    const korean = isKorean(opt) ? opt : (q.optionKorean ? q.optionKorean[idx] : null);
+    const speakPart = korean
+      ? `<button class="quiz-option-speak" onclick="event.stopPropagation();speak('${korean.replace(/'/g,"\\'")}')" title="Hear pronunciation">${SPEAKER_SVG}</button>`
+      : '';
+    html += `<button class="quiz-option" id="qopt-${idx}" onclick="answerQuiz(${idx})"><span class="quiz-option-text">${opt}</span>${speakPart}</button>`;
   });
   html += `</div>`;
   html += `<div id="quiz-feedback" class="quiz-feedback" style="display:none"></div>`;
@@ -699,15 +713,20 @@ function answerQuiz(idx) {
   // Feedback
   const fb = document.getElementById('quiz-feedback');
   fb.style.display = 'block';
+  // Always speak the Korean answer for reinforcement
+  const koreanToSpeak = q.type === 'ko-en'
+    ? q.questionKorean
+    : (q.type === 'en-ko' || q.type === 'scenario') ? q.answer : q.questionKorean;
+
   if (correct) {
     fb.className = 'quiz-feedback correct';
     fb.textContent = '✓ Correct! Well done.';
-    speak('정답이에요');
+    setTimeout(() => speak(koreanToSpeak), 300);
   } else {
     fb.className = 'quiz-feedback wrong';
     const rom = q.answerRom ? ` (${q.answerRom})` : '';
     fb.textContent = `✗ The correct answer is: ${q.answer}${rom}`;
-    speak(q.answer);
+    setTimeout(() => speak(koreanToSpeak), 300);
   }
 
   // Next button
