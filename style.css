@@ -659,6 +659,40 @@ body {
 }
 .quiz-next-btn.visible { visibility: visible; }
 
+/* Retry badge shown when a wrong-answer card comes back around */
+.quiz-retry-badge {
+  display: inline-block;
+  background: rgba(239,68,68,0.12);
+  color: var(--error);
+  font-size: 0.68rem;
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+
+/* Per-attempt breakdown on the results screen */
+.quiz-breakdown {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  margin: 12px auto;
+  max-width: 280px;
+  text-align: left;
+}
+.quiz-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.quiz-breakdown-item:last-child { border-bottom: none; }
+.qbd-pts { font-weight: 700; color: var(--accent); }
+.qbd-label { color: var(--muted); font-size: 0.78rem; }
+
 /* Quiz End Screen — scrollable since it's a summary */
 #screen-quiz.quiz-end-active {
   overflow-y: auto;
