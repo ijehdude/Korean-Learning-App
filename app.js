@@ -679,7 +679,7 @@ function renderQuizQuestion() {
   q.options.forEach((opt, idx) => {
     const korean = isKorean(opt) ? opt : (q.optionKorean ? q.optionKorean[idx] : null);
     const speakPart = korean
-      ? `<button class="quiz-option-speak" onclick="event.stopPropagation();speak('${korean.replace(/'/g,"\\'")}')" title="Hear pronunciation">${SPEAKER_SVG}</button>`
+      ? `<span class="quiz-option-speak" onclick="event.stopPropagation();speak('${korean.replace(/'/g,"\\'")}')" title="Hear pronunciation" role="button" tabindex="0">${SPEAKER_SVG}</span>`
       : '';
     html += `<button class="quiz-option" id="qopt-${idx}" onclick="answerQuiz(${idx})"><span class="quiz-option-text">${opt}</span>${speakPart}</button>`;
   });
