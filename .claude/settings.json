@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git add -u)",
+      "Bash(git commit -m *)",
+      "Bash(git push)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -6,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/ijehdude/Desktop/korean-learning-app && git diff --quiet HEAD 2>/dev/null || (git add -u && git commit -m \"Auto-save $(date '+%Y-%m-%d %H:%M')\" && git push) 2>/dev/null || true",
+            "command": "git -C /Users/ijehdude/Desktop/korean-learning-app diff --quiet HEAD || (git -C /Users/ijehdude/Desktop/korean-learning-app add -u && git -C /Users/ijehdude/Desktop/korean-learning-app commit -m \"Auto-save $(date '+%Y-%m-%d %H:%M')\" && git -C /Users/ijehdude/Desktop/korean-learning-app push) || true",
             "statusMessage": "Pushing to GitHub..."
           }
         ]
