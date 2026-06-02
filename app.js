@@ -1168,7 +1168,7 @@ function showQuizEnd() {
   const firstTry   = quizDone.filter(q => q.attempts === 1).length;
   const secondTry  = quizDone.filter(q => q.attempts === 2).length;
   const moreTry    = quizDone.filter(q => q.attempts >= 3).length;
-  const lightning  = quizDone.filter(q => q.attempts === 1 && (q.earnedPoints || 0) >= 9).length;
+  const lightning  = quizDone.filter(q => q.attempts === 1 && (q.earnedPoints || 0) >= 90).length;
   let breakdownHtml = '';
   if (firstTry > 0)  breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${firstTry} cards</span><span class="qbd-label">First try ✓</span></div>`;
   if (secondTry > 0) breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${secondTry} cards</span><span class="qbd-label">Second try ✓</span></div>`;
