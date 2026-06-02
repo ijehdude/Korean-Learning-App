@@ -54,7 +54,7 @@ function speak(text, onEnd) {
   } else { doSpeak(); }
 }
 
-function isKorean(text) { return /[가-힯ᄀ-ᇿ]/.test(text); }
+function isKorean(text) { return /[가-힯ᄀ-ᇿ㄰-㆏]/.test(text); }
 
 const SPEAKER_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="currentColor"/><path d="M16 8.5C17.333 9.667 17.333 14.333 16 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M19 6C21.667 8.333 21.667 15.667 19 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
@@ -938,7 +938,7 @@ function updateTimerBar() {
   if (remaining <= 0) clearInterval(questionTimerInterval);
 }
 
-function generateQuizQuestions(levelData) {
+function generateQuizQuestions(levelData, isAlphabet = false) {
   const cards = levelData.cards;
   const scenarios = levelData.scenarios || [];
   const questions = [];
@@ -956,11 +956,12 @@ function generateQuizQuestions(levelData) {
     if (type === 0) {
       const others = pickOthers(card, 3);
       const pairs = [[card.english, card.korean], ...others.map(c => [c.english, c.korean])].sort(() => Math.random() - 0.5);
-      questions.push({ type: 'ko-en', questionKorean: card.korean, questionRom: card.romanization, questionText: 'What does this mean?', answer: card.english, options: pairs.map(p => p[0]), optionKorean: pairs.map(p => p[1]) });
+      const qText = isAlphabet ? 'How does this sound?' : 'What does this mean?';
+      questions.push({ type: 'ko-en', isAlphabet, questionKorean: card.korean, questionRom: card.romanization, questionText: qText, answer: card.english, options: pairs.map(p => p[0]), optionKorean: pairs.map(p => p[1]) });
     } else if (type === 1) {
       const others = pickOthers(card, 3);
       const options = [card.korean, ...others.map(c => c.korean)].sort(() => Math.random() - 0.5);
-      questions.push({ type: 'en-ko', questionText: card.english, answer: card.korean, options, answerRom: card.romanization });
+      questions.push({ type: 'en-ko', isAlphabet, questionText: card.english, answer: card.korean, options, answerRom: card.romanization });
     } else {
       if (shuffledScenarios.length > 0) {
         const sc = shuffledScenarios[scenarioIdx % shuffledScenarios.length];
@@ -987,7 +988,7 @@ function startQuizForModule(moduleId, levelId) {
   currentModuleId = moduleId;
   currentLevelId = levelId;
 
-  const questions = generateQuizQuestions(levelData);
+  const questions = generateQuizQuestions(levelData, mod.isAlphabet || false);
   quizQueue = questions.map(q => ({ ...q, attempts: 0 }));
   quizDone = [];
   quizInitialCount = questions.length;
@@ -1024,7 +1025,10 @@ function renderQuizQuestion() {
     html += `<div class="quiz-q-rom">${q.questionRom}</div>`;
     html += `<button class="quiz-speak-btn" onclick="speak('${q.questionKorean.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="none" width="18" height="18" style="vertical-align:middle;margin-right:6px"><path d="M3 9H7L12 4V20L7 15H3V9Z" fill="currentColor"/><path d="M16 8.5C17.333 9.667 17.333 14.333 16 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M19 6C21.667 8.333 21.667 15.667 19 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Hear it</button>`;
   } else {
-    html += `<div class="quiz-q-text">How do you say: <strong>"${q.questionText}"</strong> in Korean?</div>`;
+    const enKoText = q.isAlphabet
+      ? `Which letter makes this sound: <strong>"${q.questionText}"</strong>?`
+      : `How do you say: <strong>"${q.questionText}"</strong> in Korean?`;
+    html += `<div class="quiz-q-text">${enKoText}</div>`;
   }
 
   html += `<div class="quiz-options">`;
