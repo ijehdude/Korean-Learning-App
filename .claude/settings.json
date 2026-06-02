@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/ijehdude/Desktop/korean-learning-app && git diff --quiet HEAD 2>/dev/null || (git add -u && git commit -m \"Auto-save $(date '+%Y-%m-%d %H:%M')\" && git push) 2>/dev/null || true",
+            "statusMessage": "Auto-saving to GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}
