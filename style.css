@@ -837,6 +837,38 @@ body {
 }
 .quiz-next-btn.visible { visibility: visible; }
 
+/* ===== QUIZ TIMER (Kahoot-style) ===== */
+.quiz-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+.quiz-timer-bar-outer {
+  flex: 1;
+  height: 7px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.quiz-timer-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.1s linear, background 0.4s ease;
+}
+.quiz-timer-bar.warning { background: #f07d1a; }
+.quiz-timer-bar.danger  { background: var(--error); }
+.quiz-timer-num {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+  min-width: 22px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Retry badge shown when a wrong-answer card comes back around */
 .quiz-retry-badge {
   display: inline-block;

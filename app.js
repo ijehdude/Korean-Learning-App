@@ -684,6 +684,7 @@ let lastQuizModuleId = 1;
 let lastQuizLevelId = 1;
 
 function showScreen(id) {
+  clearInterval(questionTimerInterval);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   currentScreen = id;
@@ -886,18 +887,38 @@ function finishFlashcards() {
 }
 
 // ---- QUIZ STATE ----
-// attempts = total answer attempts on this card (wrong → re-queued, correct → done)
-// Points: 1st try=10, 2nd=6, 3rd=3, 4th+=1
+// Time-based scoring (Kahoot-style) × attempt multiplier:
+//   timeScore  = 10 (instant) → 5 (at 20 s), linear
+//   multiplier = 1st try ×1.0 | 2nd ×0.6 | 3rd ×0.3 | 4th+ ×0.1
+//   earnedPts  = max(1, round(timeScore × multiplier))
 let quizQueue = [];
 let quizDone = [];
 let quizInitialCount = 0;
 let quizAnswered = false;
+let questionStartTime = 0;
+let questionTimerInterval = null;
+const QUESTION_TIME_LIMIT = 20000;
 
-function pointsForAttempts(attempts) {
-  if (attempts === 1) return 10;
-  if (attempts === 2) return 6;
-  if (attempts === 3) return 3;
-  return 1;
+function calculateQuestionPoints(timeTaken, attempts) {
+  const t = Math.min(timeTaken, QUESTION_TIME_LIMIT);
+  const timeScore = 5 + 5 * (1 - t / QUESTION_TIME_LIMIT);
+  const multipliers = [1.0, 0.6, 0.3, 0.1];
+  const mult = multipliers[Math.min(attempts - 1, 3)];
+  return Math.max(1, Math.round(timeScore * mult));
+}
+
+function updateTimerBar() {
+  const elapsed = Date.now() - questionStartTime;
+  const remaining = Math.max(0, QUESTION_TIME_LIMIT - elapsed);
+  const pct = (remaining / QUESTION_TIME_LIMIT) * 100;
+  const bar = document.getElementById('quiz-timer-bar');
+  const num = document.getElementById('quiz-timer-num');
+  if (bar) {
+    bar.style.width = pct + '%';
+    bar.className = 'quiz-timer-bar' + (pct <= 20 ? ' danger' : pct <= 45 ? ' warning' : '');
+  }
+  if (num) num.textContent = Math.ceil(remaining / 1000);
+  if (remaining <= 0) clearInterval(questionTimerInterval);
 }
 
 function generateQuizQuestions(levelData) {
@@ -971,6 +992,7 @@ function renderQuizQuestion() {
   quizAnswered = false;
 
   let html = `<div class="quiz-question">`;
+  html += `<div class="quiz-timer-wrap"><div class="quiz-timer-bar-outer"><div class="quiz-timer-bar" id="quiz-timer-bar"></div></div><span class="quiz-timer-num" id="quiz-timer-num">20</span></div>`;
   if (q.attempts > 0) {
     html += `<div class="quiz-q-num"><span class="quiz-retry-badge">↻ RETRY #${q.attempts + 1}</span></div>`;
   } else {
@@ -998,9 +1020,15 @@ function renderQuizQuestion() {
   html += `<div class="quiz-bottom"><div id="quiz-feedback" class="quiz-feedback"></div><button class="quiz-next-btn" id="quiz-next-btn" onclick="advanceQuiz()">Next Question →</button></div>`;
 
   document.getElementById('quiz-body').innerHTML = html;
+
+  clearInterval(questionTimerInterval);
+  questionStartTime = Date.now();
+  questionTimerInterval = setInterval(updateTimerBar, 100);
+  updateTimerBar();
 }
 
 function advanceQuiz() {
+  clearInterval(questionTimerInterval);
   if (quizQueue.length === 0) showQuizEnd();
   else renderQuizQuestion();
 }
@@ -1008,13 +1036,21 @@ function advanceQuiz() {
 function answerQuiz(idx) {
   if (quizAnswered) return;
   quizAnswered = true;
+  clearInterval(questionTimerInterval);
+  const timeTaken = Date.now() - questionStartTime;
 
   const q = quizQueue[0];
   const correct = q.options[idx] === q.answer;
   q.attempts++;
 
-  if (correct) { quizDone.push(q); quizQueue.shift(); }
-  else { quizQueue.shift(); quizQueue.push(q); }
+  if (correct) {
+    q.earnedPoints = calculateQuestionPoints(timeTaken, q.attempts);
+    quizDone.push(q);
+    quizQueue.shift();
+  } else {
+    quizQueue.shift();
+    quizQueue.push(q);
+  }
 
   document.getElementById('quiz-score-display').textContent = `${quizDone.length}/${quizInitialCount}`;
 
@@ -1029,9 +1065,12 @@ function answerQuiz(idx) {
   const koreanToSpeak = q.type === 'ko-en' ? q.questionKorean : q.answer;
 
   if (correct) {
-    const pts = pointsForAttempts(q.attempts);
+    const pts = q.earnedPoints;
+    const speedLabel = timeTaken < 5000 ? ' ⚡' : '';
     fb.className = 'quiz-feedback correct visible';
-    fb.textContent = q.attempts === 1 ? `✓ Correct! +${pts} pts` : `✓ Got it! +${pts} pts (attempt ${q.attempts})`;
+    fb.textContent = q.attempts === 1
+      ? `✓ Correct! +${pts} pts${speedLabel}`
+      : `✓ Got it! +${pts} pts (attempt ${q.attempts})`;
   } else {
     fb.className = 'quiz-feedback wrong visible';
     const rom = q.answerRom ? ` (${q.answerRom})` : '';
@@ -1046,7 +1085,7 @@ function answerQuiz(idx) {
 }
 
 function showQuizEnd() {
-  const totalPoints = quizDone.reduce((sum, q) => sum + pointsForAttempts(q.attempts), 0);
+  const totalPoints = quizDone.reduce((sum, q) => sum + (q.earnedPoints || 0), 0);
   const maxPoints = quizInitialCount * 10;
   const pct = Math.round((totalPoints / maxPoints) * 100);
   const pass = pct >= 70;
@@ -1079,13 +1118,15 @@ function showQuizEnd() {
   checkAllBadges();
   saveState();
 
-  const firstTry  = quizDone.filter(q => q.attempts === 1).length;
-  const secondTry = quizDone.filter(q => q.attempts === 2).length;
-  const moreTry   = quizDone.filter(q => q.attempts >= 3).length;
+  const firstTry   = quizDone.filter(q => q.attempts === 1).length;
+  const secondTry  = quizDone.filter(q => q.attempts === 2).length;
+  const moreTry    = quizDone.filter(q => q.attempts >= 3).length;
+  const lightning  = quizDone.filter(q => q.attempts === 1 && (q.earnedPoints || 0) >= 9).length;
   let breakdownHtml = '';
-  if (firstTry > 0)  breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${firstTry} × 10 pts</span><span class="qbd-label">First try ✓</span></div>`;
-  if (secondTry > 0) breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${secondTry} × 6 pts</span><span class="qbd-label">Second try ✓</span></div>`;
-  if (moreTry > 0)   breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${moreTry} × 1–3 pts</span><span class="qbd-label">Multiple tries ✓</span></div>`;
+  if (firstTry > 0)  breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${firstTry} cards</span><span class="qbd-label">First try ✓</span></div>`;
+  if (secondTry > 0) breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${secondTry} cards</span><span class="qbd-label">Second try ✓</span></div>`;
+  if (moreTry > 0)   breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">${moreTry} cards</span><span class="qbd-label">Multiple tries ✓</span></div>`;
+  if (lightning > 0) breakdownHtml += `<div class="quiz-breakdown-item"><span class="qbd-pts">⚡ ${lightning}</span><span class="qbd-label">Lightning fast (&lt;5s)</span></div>`;
 
   const emoji = pct === 100 ? '🏆' : pct >= 90 ? '⭐' : pct >= 70 ? '✅' : '📚';
   document.getElementById('quiz-body').innerHTML = `
