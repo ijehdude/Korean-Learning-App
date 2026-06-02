@@ -6,6 +6,22 @@
 const ttsSupported = 'speechSynthesis' in window;
 let speakBtn = null;
 let cachedVoices = [];
+
+// Bare jamo can't be spoken by TTS — map each to a representative syllable
+const JAMO_TTS = {
+  // Basic vowels → standalone syllable (ㅇ placeholder + vowel)
+  'ㅏ':'아', 'ㅓ':'어', 'ㅗ':'오', 'ㅜ':'우', 'ㅡ':'으', 'ㅣ':'이',
+  'ㅑ':'야', 'ㅕ':'여', 'ㅛ':'요', 'ㅠ':'유',
+  // Compound vowels
+  'ㅐ':'애', 'ㅔ':'에', 'ㅘ':'와', 'ㅝ':'워', 'ㅚ':'외', 'ㅟ':'위', 'ㅢ':'의',
+  // Basic consonants → consonant + ㅏ syllable
+  'ㄱ':'가', 'ㄴ':'나', 'ㄷ':'다', 'ㄹ':'라', 'ㅁ':'마',
+  'ㅂ':'바', 'ㅅ':'사', 'ㅇ':'아', 'ㅈ':'자', 'ㅎ':'하',
+  // Aspirated consonants
+  'ㅋ':'카', 'ㅌ':'타', 'ㅍ':'파', 'ㅊ':'차',
+  // Tense consonants
+  'ㄲ':'까', 'ㄸ':'따', 'ㅃ':'빠', 'ㅆ':'싸', 'ㅉ':'짜',
+};
 function loadVoices() { cachedVoices = speechSynthesis.getVoices(); }
 loadVoices();
 speechSynthesis.onvoiceschanged = loadVoices;
@@ -20,9 +36,10 @@ function pickFemaleKoreanVoice() {
 
 function speak(text, onEnd) {
   if (!ttsSupported) return;
+  const spoken = JAMO_TTS[text] || text;
   speechSynthesis.cancel();
   const doSpeak = () => {
-    const utt = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(spoken);
     utt.lang = 'ko-KR'; utt.rate = 0.85; utt.pitch = 1.05;
     if (speakBtn) speakBtn.classList.add('speaking');
     utt.onend  = () => { if (speakBtn) speakBtn.classList.remove('speaking'); if (onEnd) onEnd(); };
@@ -978,9 +995,9 @@ function startQuizForModule(moduleId, levelId) {
 
   document.getElementById('quiz-module-title').textContent = `${mod.title} — Level ${levelId} Quiz`;
   document.getElementById('quiz-score-display').textContent = `0/${quizInitialCount}`;
-  renderQuizQuestion();
   showScreen('quiz');
   setNav('quiz');
+  renderQuizQuestion();
 }
 
 function renderQuizQuestion() {
