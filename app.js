@@ -914,20 +914,46 @@ let quizInitialCount = 0;
 let quizAnswered = false;
 let questionStartTime = 0;
 let questionTimerInterval = null;
-const QUESTION_TIME_LIMIT = 20000;
+const QUESTION_TIME_LIMIT = 20000; // total window in ms
+const QUESTION_GRACE     = 1000;  // full-points grace period in ms
 
+// 100-point scale per question (max quiz = 1000 pts for 10 questions).
+// Wider scale ensures every second gives a distinct score after rounding.
+// Per-attempt curves — grace only on 1st try (question not yet seen on retry):
+//   1st try : grace 0–1 s = 100, then 100 → 50 over 19 s  (~2.6 pts/s)
+//   2nd try : no grace,          60  → 20 over 20 s        (2 pts/s)
+//   3rd try : no grace,          40  → 10 over 20 s        (1.5 pts/s)
+//   4th+    : flat 10 pts
 function calculateQuestionPoints(timeTaken, attempts) {
   const t = Math.min(timeTaken, QUESTION_TIME_LIMIT);
-  const timeScore = 5 + 5 * (1 - t / QUESTION_TIME_LIMIT);
-  const multipliers = [1.0, 0.6, 0.3, 0.1];
-  const mult = multipliers[Math.min(attempts - 1, 3)];
-  return Math.max(1, Math.round(timeScore * mult));
+  if (attempts === 1) {
+    const effective = Math.max(0, t - QUESTION_GRACE);
+    const decayWindow = QUESTION_TIME_LIMIT - QUESTION_GRACE; // 19 000 ms
+    return Math.max(50, Math.round(100 - 50 * (effective / decayWindow)));
+  }
+  if (attempts === 2) {
+    return Math.max(20, Math.round(60 - 40 * (t / QUESTION_TIME_LIMIT)));
+  }
+  if (attempts === 3) {
+    return Math.max(10, Math.round(40 - 30 * (t / QUESTION_TIME_LIMIT)));
+  }
+  return 10;
 }
 
 function updateTimerBar() {
   const elapsed = Date.now() - questionStartTime;
   const remaining = Math.max(0, QUESTION_TIME_LIMIT - elapsed);
-  const pct = (remaining / QUESTION_TIME_LIMIT) * 100;
+
+  // Bar stays full during grace window, then decays over the remaining time
+  let pct;
+  if (elapsed <= QUESTION_GRACE) {
+    pct = 100;
+  } else {
+    const afterGrace = elapsed - QUESTION_GRACE;
+    const decayWindow = QUESTION_TIME_LIMIT - QUESTION_GRACE;
+    pct = Math.max(0, (1 - afterGrace / decayWindow) * 100);
+  }
+
   const bar = document.getElementById('quiz-timer-bar');
   const num = document.getElementById('quiz-timer-num');
   if (bar) {
@@ -1087,7 +1113,7 @@ function answerQuiz(idx) {
 
   if (correct) {
     const pts = q.earnedPoints;
-    const speedLabel = timeTaken < 5000 ? ' ⚡' : '';
+    const speedLabel = timeTaken < QUESTION_GRACE + 2000 ? ' ⚡' : '';
     fb.className = 'quiz-feedback correct visible';
     fb.textContent = q.attempts === 1
       ? `✓ Correct! +${pts} pts${speedLabel}`
@@ -1107,7 +1133,7 @@ function answerQuiz(idx) {
 
 function showQuizEnd() {
   const totalPoints = quizDone.reduce((sum, q) => sum + (q.earnedPoints || 0), 0);
-  const maxPoints = quizInitialCount * 10;
+  const maxPoints = quizInitialCount * 100;
   const pct = Math.round((totalPoints / maxPoints) * 100);
   const pass = pct >= 70;
 
