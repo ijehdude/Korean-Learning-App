@@ -185,13 +185,13 @@ body {
 .level-cards, #level-cards {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 24px;
+  gap: 10px;
+  padding-bottom: 8px;
 }
 .level-card {
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 12px 14px;
   border: 1px solid rgba(255,255,255,0.06);
   transition: var(--transition);
 }
