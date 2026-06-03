@@ -820,13 +820,18 @@ body {
 .quiz-option.show-correct { border-color: var(--success); background: rgba(74,222,128,0.08); }
 .quiz-option:disabled { cursor: not-allowed; }
 
-/* Feedback + next sit below options, always in view */
+/* Feedback + next stay pinned to the bottom of the scroll area, always in view */
 .quiz-bottom {
   flex-shrink: 0;
-  padding: 6px 16px 12px;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 10px 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: var(--bg);
+  box-shadow: 0 -10px 18px -10px var(--bg);
 }
 .quiz-feedback {
   padding: 10px 12px;
