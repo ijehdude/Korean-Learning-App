@@ -691,8 +691,27 @@ body {
   background: var(--accent);
   transition: width 0.3s ease;
 }
+/* Quiz screen is a flex column: header/progress fixed, question area scrolls,
+   feedback + Next button stay pinned at the bottom (always visible). */
+#screen-quiz {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: var(--nav-h);
+}
+#screen-quiz .screen-header,
+#screen-quiz .quiz-progress-bar-wrap { flex-shrink: 0; }
+#quiz-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .quiz-question {
-  padding: 20px 16px;
+  flex: 1 1 auto;
+  padding: 16px 16px 8px;
 }
 .quiz-q-num {
   font-size: 0.68rem;
