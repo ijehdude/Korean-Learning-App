@@ -373,14 +373,14 @@ body {
 /* ===== MODULE DETAIL ===== */
 .module-hero {
   text-align: center;
-  padding: 24px 0 12px;
-  font-size: 3rem;
+  padding: 12px 0 6px;
+  font-size: 2.1rem;
 }
 .module-desc {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--muted);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 .lesson-list {
   background: var(--surface);
