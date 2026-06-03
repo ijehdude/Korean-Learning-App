@@ -230,7 +230,7 @@ body {
 .level-actions { display: flex; gap: 8px; }
 .level-btn-fc {
   flex: 1;
-  padding: 10px;
+  padding: 9px;
   background: var(--accent);
   color: #0f1c3a;
   font-weight: 700;
@@ -238,13 +238,13 @@ body {
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  min-height: 42px;
+  min-height: 40px;
   transition: var(--transition);
 }
 .level-btn-fc:hover { filter: brightness(1.1); }
 .level-btn-quiz {
   flex: 1;
-  padding: 10px;
+  padding: 9px;
   background: transparent;
   color: var(--accent);
   font-weight: 700;
@@ -252,7 +252,7 @@ body {
   border: 1.5px solid var(--accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  min-height: 42px;
+  min-height: 40px;
   transition: var(--transition);
 }
 .level-btn-quiz:hover:not(:disabled) { background: rgba(201,164,74,0.08); }
