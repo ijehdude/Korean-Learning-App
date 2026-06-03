@@ -213,13 +213,13 @@ body {
 }
 .level-status { font-size: 1rem; }
 .level-name   { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
-.level-subdesc { font-size: 0.76rem; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+.level-subdesc { font-size: 0.76rem; color: var(--muted); margin-bottom: 8px; line-height: 1.35; }
 .level-prog-bar {
   height: 3px;
   background: rgba(255,255,255,0.08);
   border-radius: 2px;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .level-prog-fill {
   height: 100%;
