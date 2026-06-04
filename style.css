@@ -758,11 +758,11 @@ body {
   color: #f07d1a;
   font-size: 0.82rem;
   font-weight: 600;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   margin-bottom: 8px;
-  min-height: 38px;
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
   transition: var(--transition);
