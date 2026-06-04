@@ -748,7 +748,7 @@ body {
 .quiz-q-rom {
   font-size: 0.78rem;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-style: italic;
   flex-shrink: 0;
 }
