@@ -739,7 +739,7 @@ body {
   flex-shrink: 0;
 }
 .quiz-q-korean {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--accent);
   margin-bottom: 2px;
